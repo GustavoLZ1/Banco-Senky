@@ -1,0 +1,11 @@
+from models.clientes import Cliente
+from models.conta import Conta
+
+# preencha com nome,e-mail,CPF,data de nascimento.
+nome: Cliente = Cliente('','','','',)
+
+
+contaf: Conta = Conta(nome)
+
+print(contaf)
+
