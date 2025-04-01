@@ -1,0 +1,94 @@
+from models.clientes import Cliente
+from utils.helper import formata_float_str_moeda
+
+class Conta:
+
+    codigo: int = 1001
+    
+    def __init__(self: object, cliente: Cliente) -> None:
+        self.__numero: int = Conta.codigo
+        self.__cliente: Cliente = cliente
+        self.__saldo: float = 0.0
+        self.__limite: float = 100.0
+        self.__saldo_total: float = self._calcula_saldo_total()  # Corrigido para chamar o método corretamente
+        Conta.codigo += 1
+
+    def __str__(self: object) -> str:
+        return f'Número da conta: {self.numero} \nCliente: {self.cliente.nome}'\
+        f'\nSaldo total: {formata_float_str_moeda(self.saldo_total)}'
+    
+    @property
+    def numero(self) -> int:
+        return self.__numero
+
+    @property
+    def cliente(self) -> Cliente:
+        return self.__cliente
+
+    @property
+    def saldo(self) -> float:
+        return self.__saldo
+
+    @saldo.setter
+    def saldo(self, valor: float) -> None:
+        self.__saldo = valor
+
+    @property
+    def limite(self) -> float:
+        return self.__limite
+
+    @limite.setter
+    def limite(self, valor: float) -> None:
+        self.__limite = valor
+
+    @property
+    def saldo_total(self) -> float:
+        return self.__saldo_total
+
+    @saldo_total.setter
+    def saldo_total(self, valor: float) -> None:
+        self.__saldo_total = valor
+
+    # Método que calcula o saldo total somando o saldo disponível e o limite
+    def _calcula_saldo_total(self) -> float:
+        return self.saldo + self.limite
+
+    def depositar(self, valor: float) -> None:
+        if valor > 0:
+            self.saldo += valor  # Atualiza o saldo
+            self.saldo_total = self._calcula_saldo_total()  # Recalcula o saldo total
+            print('Depósito efetuado com sucesso.')
+        else:
+            print('Erro ao efetuar depósito. Tente novamente.')
+
+    def sacar(self, valor: float) -> None:
+        if valor > 0 and self.saldo_total >= valor:
+            if self.saldo >= valor:
+                self.saldo -= valor  # Deduz o valor do saldo
+                self.saldo_total = self._calcula_saldo_total()  # Recalcula o saldo total
+            else:
+                restante = valor - self.saldo  # Calcula o valor que falta para o saque
+                self.limite -= restante  # Deduz o valor do limite
+                self.saldo = 0  # Zera o saldo
+                self.saldo_total = self._calcula_saldo_total()  # Recalcula o saldo total
+            print('Saque efetuado com sucesso.')
+        else:
+            print('Saque não realizado. Tente novamente.')
+
+    def transferir(self, destino: 'Conta', valor: float) -> None:
+        if valor > 0 and self.saldo_total >= valor:
+            if self.saldo >= valor:
+                self.saldo -= valor  # Deduz o valor do saldo
+                self.saldo_total = self._calcula_saldo_total()  # Recalcula o saldo total
+                destino.saldo += valor  # Adiciona o valor à conta destino
+                destino.saldo_total = destino._calcula_saldo_total()  # Recalcula o saldo total da conta destino
+            else:
+                restante = valor - self.saldo  # Calcula o valor que falta para a transferência
+                self.saldo = 0  # Zera o saldo
+                self.limite -= restante  # Deduz o valor do limite
+                self.saldo_total = self._calcula_saldo_total()  # Recalcula o saldo total
+                destino.saldo += valor  # Adiciona o valor à conta destino
+                destino.saldo_total = destino._calcula_saldo_total()  # Recalcula o saldo total da conta destino
+            print('Transferência realizada com sucesso.')
+        else:
+            print('Transferência não realizada. Tente novamente.')
